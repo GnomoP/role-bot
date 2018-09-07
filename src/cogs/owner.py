@@ -42,11 +42,7 @@ class Owner:
   @commands.command()
   async def purge(self, ctx, limit: int=200):
     def predicate(m):
-      return (
-        m.author.id == ctx.me.id or
-        ctx.me in m.mentions or
-        m.id != ctx.message.id
-      )
+      return m.id != ctx.message.id and (m.author.id == ctx.me.id or ctx.me in m.mentions)
 
     async for message in ctx.channel.history(limit=limit).filter(predicate):
       if message.id == ctx.message.id:
