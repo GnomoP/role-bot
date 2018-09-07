@@ -2,11 +2,13 @@
 
 import os
 import sys
+import json
 import asyncio
 import traceback
+import discord
 from discord.ext import commands
-from src.utils import fprint
-from src.const import SYNC_TIME
+from src.utils import fprint, guild_config
+from src.const import SYNC_TIME, CHAR_LIMIT
 
 
 class OwnerCogs:
@@ -35,6 +37,29 @@ class OwnerCogs:
 
     fprint("Restarting...")
     os.execl(sys.executable, sys.executable, *sys.argv)
+
+  @commands.is_owner()
+  @commands.command(name="config", hidden=True)
+  async def get_config(self, ctx, guild_id: int=0):
+    try:
+      guild = ctx.bot.get_guild(guild_id) or ctx.guild
+      assert isinstance(guild, discord.Guild)
+    except Exception:
+      try:
+        await ctx.message.delete()
+      except Exception:
+        pass
+
+      traceback.print_exc()
+      return
+
+    config = guild_config(ctx.bot.db, guild.id)
+    message = "```\n{}\n```".format(json.dumps(config, sort_keys=True, indent=2)))[:CHAR_LIMIT]
+
+    try:
+      await ctx.send(message)
+    except Exception:
+      pass
 
   @commands.is_owner()
   @commands.command(name="load", hidden=True)

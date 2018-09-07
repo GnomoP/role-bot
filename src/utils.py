@@ -33,7 +33,7 @@ def guild_config(db, guild_id: int, params: dict={}):
     config.update(params)
 
   try:
-    db.set(guild_id, json.dumps(config, sort_keys=True, indent=2))
+    db.set(guild_id, json.dumps(config))
   except json.JSONDecodeError:
     return None
   except Exception:
