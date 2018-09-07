@@ -98,7 +98,7 @@ class Bot(commands.Bot):
       if role.id not in config.get("exceptions", []):
         roles[role.position] = role.name
 
-    roles = dict(sorted(roles.items())).values()
+    roles = list(dict(sorted(roles.items())).values())
     roles.pop(0)
 
     tags = ["**"]
