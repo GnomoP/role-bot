@@ -114,6 +114,7 @@ class Bot(commands.Bot):
 
     messages = []
     for tag in tags:
+      tag = ", ".join(tag)
       messages += [(await channel.send(content=tag)).id]
 
     config["messages"] = messages
