@@ -12,7 +12,7 @@ class RoleCogs:
   @commands.check(has_permissions)
   async def channel(self, ctx, *, channel: str=None):
     if not channel:
-      channel = self.get_guild_channel(ctx, guild_config(ctx.guild.id)["channel"])
+      channel = self.get_guild_channel(ctx, guild_config(ctx.bot.db, ctx.guild.id)["channel"])
 
       try:
         message = (f"Current role channel: <#{channel.id}>.\n"
@@ -32,7 +32,7 @@ class RoleCogs:
 
     try:
       channel = self.get_guild_channel(ctx, channel)
-      guild_config(ctx.guild.id, {"channel": channel.id})
+      guild_config(ctx.bot.db, ctx.guild.id, {"channel": channel.id})
       await ctx.message.add_reaction("✅")
 
     except Exception:
@@ -51,7 +51,7 @@ class RoleCogs:
   async def update(self, ctx):
     try:
       await ctx.bot.update_roles(ctx.guild)
-      if ctx.channel.id == guild_config(ctx.guild.id)["channel"]:
+      if ctx.channel.id == guild_config(ctx.bot.db, ctx.guild.id)["channel"]:
         try:
           await ctx.message.delete()
         except Exception:
@@ -79,8 +79,8 @@ class RoleCogs:
       assert len(roles) > 0
 
       roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx, role) for role in roles]))
-      excp = [role for role in guild_config(ctx.guild.id)["exceptions"] if role not in [role.id for role in roles]]
-      guild_config(ctx.guild.id, {"exceptions": excp})
+      excp = [role for role in guild_config(ctx.bot.db, ctx.guild.id)["exceptions"] if role not in [role.id for role in roles]]
+      guild_config(ctx.bot.db, ctx.guild.id, {"exceptions": excp})
 
       await ctx.bot.update_roles(ctx.guild)
 
@@ -106,8 +106,8 @@ class RoleCogs:
       assert len(roles) > 0
 
       roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx, role) for role in roles]))
-      excp = [role for role in guild_config(ctx.guild.id)["exceptions"]] + [role.id for role in roles]
-      guild_config(ctx.guild.id, {"exceptions": list(set(excp))})
+      excp = [role for role in guild_config(ctx.bot.db, ctx.guild.id)["exceptions"]] + [role.id for role in roles]
+      guild_config(ctx.bot.db, ctx.guild.id, {"exceptions": list(set(excp))})
 
       await ctx.bot.update_roles(ctx.guild)
 
@@ -132,8 +132,8 @@ class RoleCogs:
       assert len(roles) > 0
 
       roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx, role) for role in roles]))
-      allw = [role for role in guild_config(ctx.guild.id)["allowed"]] + [role.id for role in roles]
-      guild_config(ctx.guild.id, {"allowed": list(set(allw))})
+      allw = [role for role in guild_config(ctx.bot.db, ctx.guild.id)["allowed"]] + [role.id for role in roles]
+      guild_config(ctx.bot.db, ctx.guild.id, {"allowed": list(set(allw))})
 
     except Exception:
       try:
@@ -156,8 +156,8 @@ class RoleCogs:
       assert len(roles) > 0
 
       roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx, role) for role in roles]))
-      allw = [role for role in guild_config(ctx.guild.id)["allowed"] if role not in [role.id for role in roles]]
-      guild_config(ctx.guild.id, {"allowed": allw})
+      allw = [role for role in guild_config(ctx.bot.db, ctx.guild.id)["allowed"] if role not in [role.id for role in roles]]
+      guild_config(ctx.bot.db, ctx.guild.id, {"allowed": allw})
 
     except Exception:
       try:
