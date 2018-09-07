@@ -44,28 +44,22 @@ class Owner:
     def predicate(m):
       return m.id != ctx.message.id and (m.author.id == ctx.me.id or ctx.me in m.mentions)
 
-    async for message in ctx.channel.history(limit=limit).filter(predicate):
-      if message.id == ctx.message.id:
-        continue
+    try:
+      await ctx.channel.purge(limit=limit, check=predicate)
+
+    except Exception:
+      fprint(f"Failed to delete message ({message})", file=sys.stderr)
 
       try:
-        await message.delete()
+        await ctx.message.add_reaction("❗")
       except Exception:
-        fprint(f"Failed to delete message ({message})", file=sys.stderr)
-        break
+        pass
 
     else:
       try:
         await ctx.message.add_reaction("✅")
       except Exception:
         pass
-
-      return
-
-    try:
-      await ctx.message.add_reaction("❗")
-    except Exception:
-      pass
 
   @commands.is_owner()
   @commands.command(name="config", hidden=True)
