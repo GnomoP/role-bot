@@ -107,8 +107,8 @@ class Bot(commands.Bot):
 
     tags = ["**"]
     while len(role) > 0:
-      if len(tags[-1] + role[-1]) < (CHAR_LIMIT - 2):
-        tags[-1] += role.pop()
+      if len(tags[-1] + ", " + role[-1]) < (CHAR_LIMIT - 2):
+        tags[-1] += ", " + role.pop()
       else:
         tags[-1] += "**"
         tags.append("**")
