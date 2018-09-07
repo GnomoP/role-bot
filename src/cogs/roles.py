@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
+import json
 import traceback
 import discord
 from discord.ext import commands
+from src.const import CHAR_LIMIT
 from src.utils import guild_config, has_permissions
 
 
-class RoleCogs:
+class Roles:
   @commands.command()
   @commands.guild_only()
   @commands.check(has_permissions)
@@ -169,6 +171,68 @@ class RoleCogs:
       except Exception:
         pass
 
+  @commands.command(name="roles")
+  async def show_roles(self, ctx, guild_id: int=0):
+    if ctx.author.id == ctx.bot.owner_id:
+      try:
+        guild = ctx.bot.get_guild(guild_id) or ctx.guild
+        assert isinstance(guild, discord.Guild)
+
+      except Exception:
+        try:
+          await ctx.message.delete()
+        except Exception:
+          pass
+
+        traceback.print_exc()
+        return
+
+    else:
+      if not (ctx.guild and has_permissions(ctx)):
+        return
+
+      guild = ctx.guild
+
+    config = guild_config(ctx.bot.db, guild.id)
+    roles = {"roles": config.get("roles", []), "exceptions": config.get("exceptions", [])}
+    message = "```json\n{}\n```".format(json.dumps(roles, sort_keys=True, indent=2))[:CHAR_LIMIT]
+
+    try:
+      await ctx.send(message)
+    except Exception:
+      pass
+
+  @commands.command(name="allowed")
+  async def show_allowed_roles(self, ctx, guild_id: int=0):
+    if ctx.author.id == ctx.bot.owner_id:
+      try:
+        guild = ctx.bot.get_guild(guild_id) or ctx.guild
+        assert isinstance(guild, discord.Guild)
+
+      except Exception:
+        try:
+          await ctx.message.delete()
+        except Exception:
+          pass
+
+        traceback.print_exc()
+        return
+
+    else:
+      if not (ctx.guild and has_permissions(ctx)):
+        return
+
+      guild = ctx.guild
+
+    config = guild_config(ctx.bot.db, guild.id)
+    roles = {"allowed": config.get("allowed")}
+    message = "```json\n{}\n```".format(json.dumps(roles, sort_keys=True, indent=2))[:CHAR_LIMIT]
+
+    try:
+      await ctx.send(message)
+    except Exception:
+      pass
+
   def get_guild_channel(self, ctx, id):
     if isinstance(id, int):
       channel = ctx.guild.get_channel(id)
@@ -231,4 +295,4 @@ class RoleCogs:
 
 
 def setup(bot):
-  bot.add_cog(RoleCogs())
+  bot.add_cog(Roles())

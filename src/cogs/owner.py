@@ -11,7 +11,7 @@ from src.utils import fprint, guild_config
 from src.const import SYNC_TIME, CHAR_LIMIT
 
 
-class OwnerCogs:
+class Owner:
   @commands.is_owner()
   @commands.command()
   async def shutdown(self, ctx):
@@ -54,7 +54,7 @@ class OwnerCogs:
       return
 
     config = guild_config(ctx.bot.db, guild.id)
-    message = "```\n{}\n```".format(json.dumps(config, sort_keys=True, indent=2))[:CHAR_LIMIT]
+    message = "```json\n{}\n```".format(json.dumps(config, sort_keys=True, indent=2))[:CHAR_LIMIT]
 
     try:
       await ctx.send(message)
@@ -133,4 +133,4 @@ class OwnerCogs:
 
 
 def setup(bot):
-  bot.add_cog(OwnerCogs())
+  bot.add_cog(Owner())

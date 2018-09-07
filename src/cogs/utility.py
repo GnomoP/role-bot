@@ -6,7 +6,7 @@ from discord.ext import commands
 from src.utils import fprint, oauth_url
 
 
-class UtilityCogs:
+class Utility:
   @commands.command()
   async def invite(self, ctx):
     try:
@@ -31,4 +31,4 @@ class UtilityCogs:
 
 
 def setup(bot):
-  bot.add_cog(UtilityCogs())
+  bot.add_cog(Utility())
