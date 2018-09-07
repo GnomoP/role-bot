@@ -84,7 +84,7 @@ class Bot(commands.Bot):
       except Exception:
         return
 
-    tags = [", ".join(f"`{role[1]}`" for role in roles.values())]
+    tags = [", ".join(f"{role[1]}" for role in roles.values())]
 
     while len(tags[-1]) > CHAR_LIMIT:
       last = tags[-1]
