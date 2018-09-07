@@ -82,8 +82,6 @@ class RoleCogs:
       excp = [role for role in guild_config(ctx.bot.db, ctx.guild.id)["exceptions"] if role not in [role.id for role in roles]]
       guild_config(ctx.bot.db, ctx.guild.id, {"exceptions": excp})
 
-      await ctx.bot.update_roles(ctx.guild)
-
     except Exception:
       try:
         await ctx.message.add_reaction("❗")
@@ -108,8 +106,6 @@ class RoleCogs:
       roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx, role) for role in roles]))
       excp = [role for role in guild_config(ctx.bot.db, ctx.guild.id)["exceptions"]] + [role.id for role in roles]
       guild_config(ctx.bot.db, ctx.guild.id, {"exceptions": list(set(excp))})
-
-      await ctx.bot.update_roles(ctx.guild)
 
     except Exception:
       try:

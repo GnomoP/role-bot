@@ -54,7 +54,7 @@ class OwnerCogs:
       return
 
     config = guild_config(ctx.bot.db, guild.id)
-    message = "```\n{}\n```".format(json.dumps(config, sort_keys=True, indent=2)))[:CHAR_LIMIT]
+    message = "```\n{}\n```".format(json.dumps(config, sort_keys=True, indent=2))[:CHAR_LIMIT]
 
     try:
       await ctx.send(message)
