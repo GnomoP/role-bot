@@ -1,0 +1,2 @@
+git+git://github.com/Rapptz/discord.py.git@rewrite#egg=discord.py
+redis
