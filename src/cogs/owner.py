@@ -48,7 +48,7 @@ class Owner:
       await ctx.channel.purge(limit=limit, check=check)
 
     except Exception:
-      fprint(f"Failed to delete message ({message})", file=sys.stderr)
+      fprint(f"Failed to purge messages at #{ctx.channel.name} ({ctx.channel.id})", file=sys.stderr)
       try:
         await ctx.message.add_reaction("❗")
       except Exception:
