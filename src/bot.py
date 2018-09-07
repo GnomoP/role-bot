@@ -99,7 +99,7 @@ class Bot(commands.Bot):
                  "Missing permission 'read_message_history'", file=sys.stderr)
       return
 
-    for message in config["messages"]:
+    for message in config.get("messages", []):
       try:
         m = await channel.get_message(message)
         await m.delete()
