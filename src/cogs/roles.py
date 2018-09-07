@@ -14,7 +14,7 @@ class Roles:
   @commands.check(has_permissions)
   async def channel(self, ctx, *, channel: str=None):
     if not channel:
-      channel = self.get_guild_channel(ctx, guild_config(ctx.bot.db, ctx.guild.id)["channel"])
+      channel = self.get_guild_channel(ctx.guild.guild, guild_config(ctx.bot.db, ctx.guild.id)["channel"])
 
       try:
         message = (f"Current role channel: <#{channel.id}>.\n"
@@ -33,7 +33,7 @@ class Roles:
       return
 
     try:
-      channel = self.get_guild_channel(ctx, channel)
+      channel = self.get_guild_channel(ctx.guild, channel)
       guild_config(ctx.bot.db, ctx.guild.id, {"channel": channel.id})
       await ctx.message.add_reaction("✅")
 
@@ -80,7 +80,7 @@ class Roles:
     try:
       assert len(roles) > 0
 
-      roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx, role) for role in roles]))
+      roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx.guild, role) for role in roles]))
       excp = [role for role in guild_config(ctx.bot.db, ctx.guild.id)["exceptions"] if role not in [role.id for role in roles]]
       guild_config(ctx.bot.db, ctx.guild.id, {"exceptions": excp})
 
@@ -105,7 +105,7 @@ class Roles:
     try:
       assert len(roles) > 0
 
-      roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx, role) for role in roles]))
+      roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx.guild, role) for role in roles]))
       excp = [role for role in guild_config(ctx.bot.db, ctx.guild.id)["exceptions"]] + [role.id for role in roles]
       guild_config(ctx.bot.db, ctx.guild.id, {"exceptions": list(set(excp))})
 
@@ -129,7 +129,7 @@ class Roles:
     try:
       assert len(roles) > 0
 
-      roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx, role) for role in roles]))
+      roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx.guild, role) for role in roles]))
       allw = [role for role in guild_config(ctx.bot.db, ctx.guild.id)["allowed"]] + [role.id for role in roles]
       guild_config(ctx.bot.db, ctx.guild.id, {"allowed": list(set(allw))})
 
@@ -153,7 +153,7 @@ class Roles:
     try:
       assert len(roles) > 0
 
-      roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx, role) for role in roles]))
+      roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx.guild, role) for role in roles]))
       allw = [role for role in guild_config(ctx.bot.db, ctx.guild.id)["allowed"] if role not in [role.id for role in roles]]
       guild_config(ctx.bot.db, ctx.guild.id, {"allowed": allw})
 
@@ -193,8 +193,21 @@ class Roles:
 
       guild = ctx.guild
 
+    roles = {}
     config = guild_config(ctx.bot.db, guild.id)
-    roles = {"roles": config.get("roles", []), "exceptions": config.get("exceptions", [])}
+    config = {"roles": config.get("roles", []), "exceptions": config.get("exceptions", [])}
+
+    def predicate(role):
+      role = self.get_guild_role(guild, role)
+
+      if role:
+        return [role.id, role.name]
+      else:
+        return None
+
+    for key, val in config.items():
+      roles[key] = list(map(predicate, val))
+
     message = "```json\n{}\n```".format(json.dumps(roles, sort_keys=True, indent=2))[:CHAR_LIMIT]
 
     try:
@@ -224,8 +237,21 @@ class Roles:
 
       guild = ctx.guild
 
+    roles = {}
     config = guild_config(ctx.bot.db, guild.id)
-    roles = {"allowed": config.get("allowed")}
+    config = {"allowed": config.get("allowed")}
+
+    def predicate(role):
+      role = self.get_guild_role(guild, role)
+
+      if role:
+        return [role.id, role.name]
+      else:
+        return None
+
+    for key, val in config.items():
+      roles[key] = list(map(predicate, val))
+
     message = "```json\n{}\n```".format(json.dumps(roles, sort_keys=True, indent=2))[:CHAR_LIMIT]
 
     try:
@@ -233,9 +259,12 @@ class Roles:
     except Exception:
       pass
 
-  def get_guild_channel(self, ctx, id):
+  def get_guild_channel(self, guild, id):
+    if not isinstance(guild, discord.Guild):
+      raise TypeError("`guild` is not an instance of `discord.Guild`")
+
     if isinstance(id, int):
-      channel = ctx.guild.get_channel(id)
+      channel = guild.get_channel(id)
 
       if isinstance(channel, discord.TextChannel):
         return channel
@@ -244,7 +273,7 @@ class Roles:
 
     elif isinstance(id, str):
       try:
-        channel = ctx.guild.get_channel(int(id))
+        channel = guild.get_channel(int(id))
 
       except Exception:
         pass
@@ -256,7 +285,7 @@ class Roles:
           return None
 
       try:
-        channel = ctx.guild.get_channel(int(id[2:-1]))
+        channel = guild.get_channel(int(id[2:-1]))
 
       except Exception:
         pass
@@ -270,8 +299,11 @@ class Roles:
     else:
       return None
 
-  def get_guild_role(self, ctx, id):
-    for role in ctx.guild.roles:
+  def get_guild_role(self, guild, id):
+    if not isinstance(guild, discord.Guild):
+      raise TypeError("`guild` is not an instance of `discord.Guild`")
+
+    for role in guild.roles:
       if isinstance(id, int) and role.id == id:
         break
 
