@@ -6,8 +6,9 @@ from sys import argv
 argv = argv[1:]
 
 TOKEN = environ.get("TOKEN")
-PREFIXES = environ.get("PREFIXES")
 REDIS_URL = environ.get("REDIS_URL")
+
+PREFIXES = eval(environ.get("PREFIXES", "['>']"))
 
 BOT = True
 SYNC_TIME = 1
