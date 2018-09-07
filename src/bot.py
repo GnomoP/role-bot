@@ -96,16 +96,19 @@ class Bot(commands.Bot):
     roles = {}
     for role in guild.roles:
       if role.id not in config.get("exceptions", []):
-        roles[role.position] = role.name
+        roles[role.position] = (role.id, role.name)
 
     roles = dict(sorted(roles.items()))
-    roles = list(roles.values())
-    roles.pop(0)
+
+    role = []
+    for r in roles.values():
+      role.append(r[1])
+    role.pop(0)
 
     tags = ["**"]
-    while len(roles) > 0:
-      if len(tags[-1] + roles[-1]) < (CHAR_LIMIT - 2):
-        tags[-1] += roles.pop()
+    while len(role) > 0:
+      if len(tags[-1] + role[-1]) < (CHAR_LIMIT - 2):
+        tags[-1] += role.pop()
       else:
         tags[-1] += "**"
         tags.append("**")
