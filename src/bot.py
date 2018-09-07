@@ -61,14 +61,6 @@ class Bot(commands.Bot):
   async def update_roles(self, guild):
     config = guild_config(self.db, guild.id)
 
-    roles = {}
-    for role in guild.roles:
-      if role.id not in config.get("exceptions", []):
-        roles[role.position] = (role.id, role.name)
-
-    roles = dict(sorted(roles.items()))
-    roles.pop(0)
-
     for channel in guild.text_channels:
       if int(channel.id) == config.get("channel", 0):
         break
@@ -83,14 +75,6 @@ class Bot(commands.Bot):
         channel = await guild.create_text_channel("tags")
       except Exception:
         return
-
-    tags = [", ".join(f"{role[1]}" for role in roles.values())]
-
-    while len(tags[-1]) > CHAR_LIMIT:
-      last = tags[-1]
-
-      tags[-1] = last[:CHAR_LIMIT]
-      tags.append(last[CHAR_LIMIT:])
 
 
     if not guild.me.permissions_in(channel).read_message_history:
@@ -108,6 +92,24 @@ class Bot(commands.Bot):
       fprint(f"Couldn't update roles for {guild.name} ({guild.id}):",
                  "Missing permission 'send_messages'", file=sys.stderr)
       return
+
+    roles = {}
+    for role in guild.roles:
+      if role.id not in config.get("exceptions", []):
+        roles[role.position] = role.name
+
+    roles = dict(sorted(roles.items())).values()
+    roles.pop(0)
+
+    tags = ["**"]
+    while len(roles) > 0:
+      if len(tags[-1] + roles[-1]) < (CHAR_LIMIT - 2):
+        tags[-1] += roles.pop()
+      else:
+        tags[-1] += "**"
+        tags.append("**")
+    else:
+      tags[-1] += "**"
 
     messages = []
     for tag in tags:
