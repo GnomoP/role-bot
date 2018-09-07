@@ -14,7 +14,7 @@ class Roles:
   @commands.check(has_permissions)
   async def channel(self, ctx, *, channel: str=None):
     if not channel:
-      channel = self.get_guild_channel(ctx.guild.guild, guild_config(ctx.bot.db, ctx.guild.id)["channel"])
+      channel = self.get_guild_channel(ctx.guild, guild_config(ctx.bot.db, ctx.guild.id)["channel"])
 
       try:
         message = (f"Current role channel: <#{channel.id}>.\n"
