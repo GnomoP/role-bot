@@ -41,24 +41,29 @@ class Owner:
   @commands.is_owner()
   @commands.command()
   async def purge(self, ctx, limit: int=200):
-    def check(m):
-      return (m.author.id == ctx.me.id) or (ctx.me in m.mentions) or (m.id != ctx.message.id)
+    predicate = lambda m: m.author.id == ctx.me.id or ctx.me in m.mentions or m.id != ctx.message.id
+    async for message in ctx.channel.history(limit=limit).filter(predicate):
+      if message.id == ctx.message.id:
+        continue
 
-    try:
-      await ctx.channel.purge(limit=limit, check=check)
-
-    except Exception:
-      fprint(f"Failed to purge messages at #{ctx.channel.name} ({ctx.channel.id})", file=sys.stderr)
       try:
-        await ctx.message.add_reaction("❗")
+        await message.delete()
       except Exception:
-        pass
+        fprint(f"Failed to delete message ({message})", file=sys.stderr)
+        break
 
     else:
       try:
         await ctx.message.add_reaction("✅")
       except Exception:
         pass
+
+      return
+
+    try:
+      await ctx.message.add_reaction("❗")
+    except Exception:
+      pass
 
   @commands.is_owner()
   @commands.command(name="config", hidden=True)
