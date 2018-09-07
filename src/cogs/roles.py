@@ -81,7 +81,7 @@ class Roles:
       assert len(roles) > 0
 
       roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx.guild, role) for role in roles]))
-      excp = [role for role in guild_config(ctx.bot.db, ctx.guild.id)["exceptions"] if role not in [role.id for role in roles]]
+      excp = [role for role in guild_config(ctx.bot.db, ctx.guild.id).get("exceptions", []) if role not in [role.id for role in roles]]
       guild_config(ctx.bot.db, ctx.guild.id, {"exceptions": excp})
 
     except Exception:
@@ -106,7 +106,7 @@ class Roles:
       assert len(roles) > 0
 
       roles = list(filter(lambda r: r is not None, [self.get_guild_role(ctx.guild, role) for role in roles]))
-      excp = [role for role in guild_config(ctx.bot.db, ctx.guild.id)["exceptions"]] + [role.id for role in roles]
+      excp = [role for role in guild_config(ctx.bot.db, ctx.guild.id).get("exceptions", [])] + [role.id for role in roles]
       guild_config(ctx.bot.db, ctx.guild.id, {"exceptions": list(set(excp))})
 
     except Exception:
