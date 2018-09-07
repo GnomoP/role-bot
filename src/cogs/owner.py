@@ -44,7 +44,7 @@ class Owner:
     def predicate(m):
       return m.author.id == ctx.me.id or ctx.me in m.mentions
 
-    async for message in ctx.channel.history(limit).filter(predicate):
+    async for message in ctx.channel.history(limit=limit).filter(predicate):
       if message.id == ctx.message.id:
         continue
 
