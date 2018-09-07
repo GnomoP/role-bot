@@ -41,7 +41,8 @@ class Owner:
   @commands.is_owner()
   @commands.command()
   async def purge(self, ctx, limit: int=200):
-    check = lambda m: m.author.id == ctx.me.id or ctx.me in m.mentions or m.id != ctx.message.id
+    def check(m):
+      return (m.author.id == ctx.me.id) or (ctx.me in m.mentions) or (m.id != ctx.message.id)
 
     try:
       await ctx.channel.purge(limit=limit, check=check)
