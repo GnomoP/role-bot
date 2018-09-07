@@ -34,15 +34,6 @@ class Bot(commands.Bot):
     fprint(f"Left a guild: '{guild.name}' ({guild.id})")
     self.db.delete(guild.id)
 
-  async def on_guild_role_create(self, role):
-    await self.update_roles(role.guild)
-
-  async def on_guild_role_delete(self, role):
-    await self.update_roles(role.guild)
-
-  async def on_guild_role_update(self, before, after):
-    await self.update_roles(before.guild)
-
   async def on_command_error(self, ctx, e):
     if type(e).__name__ in ("CommandNotFound", "CheckFailure", "NotOwner"):
       return
