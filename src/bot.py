@@ -98,12 +98,11 @@ class Bot(commands.Bot):
                  "Missing permission 'read_message_history'", file=sys.stderr)
       return
 
-    for message in config.get("messages", []):
+    async for message in channel.history(limit=500).filter(lambda m: m.author.bot):
       try:
-        m = await channel.get_message(message)
-        await m.delete()
+        await message.delete()
       except Exception:
-          fprint(f"Failed to delete previous message ({message})", file=sys.stderr)
+          fprint(f"Failed to delete message ({message}) in role channel", file=sys.stderr)
 
     if not guild.me.permissions_in(channel).send_messages:
       fprint(f"Couldn't update roles for {guild.name} ({guild.id}):",
