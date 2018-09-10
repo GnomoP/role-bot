@@ -4,8 +4,8 @@ from discord.ext import commands
 
 
 class Fun:
-  @commands.command(hidden=True)
   @commands.is_owner()
+  @commands.command(hidden=True)
   async def say(self, ctx, *, message: str="gosei no debaixo"):
     print(message)
 
@@ -20,4 +20,4 @@ class Fun:
 
 
 def setup(bot):
-  bot.add_cog(Fun)
+  bot.add_cog(Fun())
