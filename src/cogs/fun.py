@@ -6,7 +6,9 @@ from discord.ext import commands
 class Fun:
   @commands.command(hidden=True)
   @commands.is_owner()
-  async def say(self, ctx, *, message: str):
+  async def say(self, ctx, *, message: str="gosei no debaixo"):
+    print(message)
+
     try:
       await ctx.message.delete()
       await ctx.send(" ".join(message))
