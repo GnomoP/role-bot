@@ -9,7 +9,7 @@ class Fun:
   async def say(self, ctx, *, message: str):
     try:
       await ctx.message.delete()
-      await ctx.send(message)
+      await ctx.send(" ".join(message))
     except Exception:
       try:
         await ctx.message.add_reaction("😭")
