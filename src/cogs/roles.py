@@ -214,7 +214,7 @@ class Roles:
       fp.seek(0)
 
       try:
-        await ctx.send(file=fp)
+        await ctx.send(file=discord.File(fp, filename="roles.json"))
       except (discord.Forbidden, discord.HTTPException):
         print_exc()
 
@@ -260,7 +260,7 @@ class Roles:
       fp.seek(0)
 
       try:
-        await ctx.send(file=fp)
+        await ctx.send(file=discord.File(fp, filename="allowed.json"))
       except (discord.Forbidden, discord.HTTPException, json.JSONDecodeError):
         print_exc()
 
