@@ -11,6 +11,7 @@ def git(*args):
   return check_call(["git"] + list(args))
 
 
+DEFAULT_REMOTE = "origin"
 DEFAULT_BRANCH = "remote"
 
 
@@ -117,7 +118,7 @@ if commands.get("upstream"):
     branch = commands.get("checkout_branch", DEFAULT_BRANCH)
     if branch != DEFAULT_BRANCH:
       branch = branch + ":" + DEFAULT_BRANCH
-    git("push", "-u", "heroku", branch)
+    git("push", "-u", DEFAULT_REMOTE, branch)
   except CalledProcessError as e:
     if e.returncode not in (0, 1):
       traceback.print_exc()
@@ -154,7 +155,7 @@ if commands.get("push"):
     branch = commands.get("checkout_branch", DEFAULT_BRANCH)
     if branch != DEFAULT_BRANCH:
       branch = branch + ":" + DEFAULT_BRANCH
-    git("push", "heroku", branch)
+    git("push", DEFAULT_REMOTE, branch)
   except CalledProcessError as e:
     if e.returncode not in (0, 1):
       traceback.print_exc()
@@ -162,7 +163,7 @@ if commands.get("push"):
 
 if commands.get("tail"):
   try:
-    check_call(["heroku", "logs", "-t"])
+    check_call([DEFAULT_REMOTE, "logs", "-t"])
   except KeyboardInterrupt:
     exit(0)
   except CalledProcessError as e:

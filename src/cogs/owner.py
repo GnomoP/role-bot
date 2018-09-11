@@ -70,7 +70,9 @@ class Owner:
 
     try:
       cc = compile(code, "bot_eval.py", "eval")
-      val = f"{eval(cc, {"cog": self, "bot": ctx.bot, "ctx": ctx})}"
+      val = eval(cc, {"cog": self, "bot": ctx.bot, "ctx": ctx})
+
+      val = f"{val}"
 
     except (discord.HTTPException, discord.Forbidden):
       pass
