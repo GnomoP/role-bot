@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
+import discord
 from discord.ext import commands
+from src.utils import try_react, try_delete
 
 
 class Fun:
@@ -8,13 +10,10 @@ class Fun:
   @commands.command(hidden=True)
   async def say(self, ctx, *, message: str="gosei no debaixo"):
     try:
-      await ctx.message.delete()
+      await try_delete(ctx.message)
       await ctx.send(message)
-    except Exception:
-      try:
-        await ctx.message.add_reaction("😭")
-      except Exception:
-        pass
+    except (discord.HTTPException, discord.Forbidden):
+      await try_react(ctx, "😭")
 
 
 def setup(bot):

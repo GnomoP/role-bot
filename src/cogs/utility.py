@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import traceback
+from traceback import print_exc
 import discord
 from discord.ext import commands
 from src.utils import fprint, oauth_url
@@ -15,7 +15,7 @@ class Utility:
 
     except Exception:
       fprint(f"Cannot send OAuth link to {ctx.author.name}#{ctx.author.discriminator} ({ctx.author.id})")
-      traceback.print_exc()
+      print_exc()
 
   @commands.command()
   async def ping(self, ctx):
@@ -27,7 +27,7 @@ class Utility:
         await ctx.send(f"Pong! ({latency}ms)")
 
     except Exception:
-      traceback.print_exc()
+      print_exc()
 
 
 def setup(bot):

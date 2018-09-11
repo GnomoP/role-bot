@@ -4,22 +4,20 @@ import os
 import sys
 import json
 import asyncio
-import traceback
+import tempfile
+from traceback import print_exc
 import discord
 from discord.ext import commands
-from src.utils import fprint, guild_config
 from src.const import SYNC_TIME, CHAR_LIMIT
+from src.utils import fprint, guild_config
+from src.utils import try_react, try_delete
 
 
 class Owner:
   @commands.is_owner()
   @commands.command()
   async def shutdown(self, ctx):
-    try:
-      await ctx.message.add_reaction("👋")
-    except Exception:
-      pass
-
+    await try_react(ctx, "👋")
     await asyncio.sleep(SYNC_TIME)
 
     await ctx.bot.logout()
@@ -28,11 +26,7 @@ class Owner:
   @commands.is_owner()
   @commands.command()
   async def restart(self, ctx):
-    try:
-      await ctx.message.add_reaction("👋")
-    except Exception:
-      pass
-
+    await try_react(ctx, "👋")
     await asyncio.sleep(SYNC_TIME)
 
     fprint("Restarting...")
@@ -48,18 +42,46 @@ class Owner:
       await ctx.channel.purge(limit=limit, check=predicate)
 
     except Exception:
-      fprint(f"Failed to delete message ({message})", file=sys.stderr)
-
-      try:
-        await ctx.message.add_reaction("❗")
-      except Exception:
-        pass
+      fprint(f"Failed to delete message in channel #{ctx.channel.name} ({ctx.channel.id})", file=sys.stderr)
+      await try_react(ctx, "❗")
 
     else:
-      try:
-        await ctx.message.add_reaction("✅")
-      except Exception:
-        pass
+      await try_react(ctx, "✅")
+
+  @commands.is_owner()
+  @commands.command(name="exec", aliases=["python", "py"], hidden=True)
+  async def pyexec(self, ctx, *, code):
+    try:
+      exec(code, globals={"bot": self, "ctx": ctx})
+    except (discord.HTTPException, discord.Forbidden):
+      pass
+    except Exception:
+      await try_react(ctx, "❗")
+
+      print_exc()
+    else:
+      await try_react(ctx, "✅")
+
+  @commands.is_owner()
+  @commands.command(name="eval")
+  async def pyeval(self, ctx, *, code):
+    try:
+      cc = compile(code, "code_from_discord.py", "exec")
+      exec(cc)
+
+    except (discord.HTTPException, discord.Forbidden):
+      pass
+
+    except (SyntaxError, ValueError):
+      await try_react(ctx, "❓")
+      print_exc()
+
+    except Exception:
+      await try_react(ctx, "❗")
+      print_exc()
+
+    else:
+      await try_react(ctx, "✅")
 
   @commands.is_owner()
   @commands.command(name="config", hidden=True)
@@ -67,22 +89,21 @@ class Owner:
     try:
       guild = ctx.bot.get_guild(guild_id) or ctx.guild
       assert isinstance(guild, discord.Guild)
-    except Exception:
-      try:
-        await ctx.message.delete()
-      except Exception:
-        pass
 
-      traceback.print_exc()
+    except Exception:
+      await try_delete(ctx.message)
+      print_exc()
       return
 
     config = guild_config(ctx.bot.db, guild.id)
-    message = "```json\n{}\n```".format(json.dumps(config, sort_keys=True, indent=2))[:CHAR_LIMIT]
+    with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as fp:
+      json.dump(config, fp, sort_keys=True, indent=2)
+      fp.seek(0)
 
-    try:
-      await ctx.send(message)
-    except Exception:
-      pass
+      try:
+        await ctx.send(file=discord.File(fp, filename="roles.json"))
+      except (discord.Forbidden, discord.HTTPException):
+        print_exc()
 
   @commands.is_owner()
   @commands.command(name="load", hidden=True)
@@ -92,20 +113,13 @@ class Owner:
         ctx.bot.load_extension("src.cogs." + cog)
 
     except Exception:
-      try:
-        await ctx.message.add_reaction("❗")
-        fprint(f"Failed to load cogs ({cog})", file=sys.stderr)
-      except Exception:
-        pass
-
-      traceback.print_exc()
+      await try_react(ctx, "❗")
+      fprint(f"Failed to load cogs ({cog})", file=sys.stderr)
+      print_exc()
 
     else:
-      try:
-        await ctx.message.add_reaction("✅")
-        fprint(f"Successfully loaded cogs ({', '.join(cogs)})")
-      except Exception:
-        pass
+      await try_react(ctx, "✅")
+      fprint(f"Successfully loaded cogs ({', '.join(cogs)})")
 
   @commands.is_owner()
   @commands.command(name="unload", hidden=True)
@@ -115,20 +129,13 @@ class Owner:
         ctx.bot.unload_extension("src.cogs." + cog)
 
     except Exception:
-      try:
-        await ctx.message.add_reaction("❗")
-        fprint(f"Failed to unload cogs ({cog})", file=sys.stderr)
-      except Exception:
-        pass
-
-      traceback.print_exc()
+      await try_react(ctx, "❗")
+      fprint(f"Failed to unload cogs ({cog})", file=sys.stderr)
+      print_exc()
 
     else:
-      try:
-        await ctx.message.add_reaction("✅")
-        fprint(f"Successfully unloaded cogs ({', '.join(cogs)})")
-      except Exception:
-        pass
+      await try_react(ctx, "✅")
+      fprint(f"Successfully unloaded cogs ({', '.join(cogs)})")
 
   @commands.is_owner()
   @commands.command(name="reload", hidden=True)
@@ -139,20 +146,13 @@ class Owner:
         ctx.bot.load_extension("src.cogs." + cog)
 
     except Exception:
-      try:
-        await ctx.message.add_reaction("❗")
-        fprint(f"Failed to reload cog ({cog})", file=sys.stderr)
-      except Exception:
-        pass
-
-      traceback.print_exc()
+      await try_react(ctx, "❗")
+      fprint(f"Failed to reload cog ({cog})", file=sys.stderr)
+      print_exc()
 
     else:
-      try:
-        await ctx.message.add_reaction("✅")
-        fprint(f"Successfully reloaded cogs ({', '.join(cogs)})")
-      except Exception:
-        pass
+      await try_react(ctx, "✅")
+      fprint(f"Successfully reloaded cogs ({', '.join(cogs)})")
 
 
 def setup(bot):

@@ -7,6 +7,7 @@ import discord
 from discord.ext import commands
 from src.const import CHAR_LIMIT
 from src.utils import guild_config, has_permissions
+from src.utils import try_react, try_delete
 
 
 class Roles:
@@ -28,7 +29,7 @@ class Roles:
 
       try:
         await ctx.send(message)
-      except Exception:
+      except (discord.HTTPException, discord.Forbidden):
         print_exc()
 
       return
@@ -36,14 +37,10 @@ class Roles:
     try:
       channel = self.get_guild_channel(ctx.guild, channel)
       guild_config(ctx.bot.db, ctx.guild.id, {"channel": channel.id})
-      await ctx.message.add_reaction("✅")
+      await try_react(ctx, "✅")
 
     except Exception:
-      try:
-        await ctx.message.add_reaction("❗")
-      except Exception:
-        pass
-
+      await try_react(ctx, "❗")
       print_exc()
 
     await ctx.bot.update_roles(ctx.guild)
@@ -55,24 +52,15 @@ class Roles:
     try:
       await ctx.bot.update_roles(ctx.guild)
       if ctx.channel.id == guild_config(ctx.bot.db, ctx.guild.id)["channel"]:
-        try:
-          await ctx.message.delete()
-        except Exception:
-          pass
+        await try_delete(ctx.message)
 
     except Exception:
-      try:
-        await ctx.message.add_reaction("❗")
-      except Exception:
-        pass
+      await try_react(ctx, "❗")
 
       print_exc()
 
     else:
-      try:
-        await ctx.message.add_reaction("✅")
-      except Exception:
-        pass
+      await try_react(ctx, "✅")
 
   @commands.command(aliases=["add"])
   @commands.guild_only()
@@ -86,18 +74,11 @@ class Roles:
       guild_config(ctx.bot.db, ctx.guild.id, {"exceptions": excp})
 
     except Exception:
-      try:
-        await ctx.message.add_reaction("❗")
-      except Exception:
-        pass
-
+      await try_react(ctx, "❗")
       print_exc()
 
     else:
-      try:
-        await ctx.message.add_reaction("✅")
-      except Exception:
-        pass
+      await try_react(ctx, "✅")
 
   @commands.command(aliases=["remove"])
   @commands.guild_only()
@@ -111,18 +92,11 @@ class Roles:
       guild_config(ctx.bot.db, ctx.guild.id, {"exceptions": list(set(excp))})
 
     except Exception:
-      try:
-        await ctx.message.add_reaction("❗")
-      except Exception:
-        pass
-
+      await try_react(ctx, "❗")
       print_exc()
 
     else:
-      try:
-        await ctx.message.add_reaction("✅")
-      except Exception:
-        pass
+      await try_react(ctx, "✅")
 
   @commands.command(aliases=["allow", "grant"])
   @commands.guild_only()
@@ -135,18 +109,11 @@ class Roles:
       guild_config(ctx.bot.db, ctx.guild.id, {"allowed": list(set(allw))})
 
     except Exception:
-      try:
-        await ctx.message.add_reaction("❗")
-      except Exception:
-        pass
-
+      await try_react(ctx, "❗")
       print_exc()
 
     else:
-      try:
-        await ctx.message.add_reaction("✅")
-      except Exception:
-        pass
+      await try_react(ctx, "✅")
 
   @commands.command(aliases=["unallow", "ungrant"])
   @commands.guild_only()
@@ -159,18 +126,11 @@ class Roles:
       guild_config(ctx.bot.db, ctx.guild.id, {"allowed": allw})
 
     except Exception:
-      try:
-        await ctx.message.add_reaction("❗")
-      except Exception:
-        pass
-
+      await try_react(ctx, "❗")
       print_exc()
 
     else:
-      try:
-        await ctx.message.add_reaction("✅")
-      except Exception:
-        pass
+      await try_react(ctx, "✅")
 
   @commands.command(name="roles")
   async def show_roles(self, ctx, guild_id: int=0):
@@ -180,11 +140,7 @@ class Roles:
         assert isinstance(guild, discord.Guild)
 
       except Exception:
-        try:
-          await ctx.message.delete()
-        except Exception:
-          pass
-
+        await try_delete(ctx.message)
         print_exc()
         return
 
@@ -226,10 +182,7 @@ class Roles:
         assert isinstance(guild, discord.Guild)
 
       except Exception:
-        try:
-          await ctx.message.delete()
-        except Exception:
-          pass
+        await try_delete(ctx.message)
 
         print_exc()
         return
