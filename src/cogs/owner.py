@@ -117,10 +117,10 @@ class Owner:
       with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as fp:
         fp.write(val)
 
-      try:
-        await ctx.send(file=discord.File(fp, filename="output.txt"))
-      except (discord.Forbidden, discord.HTTPException):
-        print_exc()
+        try:
+          await ctx.send(file=discord.File(fp, filename="output.txt"))
+        except (discord.Forbidden, discord.HTTPException):
+          print_exc()
 
   @commands.is_owner()
   @commands.command(name="config", hidden=True)
