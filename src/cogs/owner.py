@@ -52,7 +52,8 @@ class Owner:
   @commands.command(name="exec", aliases=["python", "py"], hidden=True)
   async def pyexec(self, ctx, *, code):
     try:
-      exec(code, globals={"bot": self, "ctx": ctx})
+      cc = compile(code, "vot_exec.py", "exec")
+      exec(cc, {"bot": self, "ctx": ctx})
     except (discord.HTTPException, discord.Forbidden):
       pass
     except Exception:
@@ -66,8 +67,8 @@ class Owner:
   @commands.command(name="eval")
   async def pyeval(self, ctx, *, code):
     try:
-      cc = compile(code, "code_from_discord.py", "exec")
-      exec(cc)
+      cc = compile(code, "bot_eval.py", "eval")
+      val = f"{eval(cc)}"
 
     except (discord.HTTPException, discord.Forbidden):
       pass
@@ -82,6 +83,21 @@ class Owner:
 
     else:
       await try_react(ctx, "✅")
+
+    if len(val) + 2 < 50:
+      await ctx.send(f"`{val}`")
+
+    elif len(val) + 8 < CHAR_LIMIT:
+      await ctx.send(f"```\n{val}\n```")
+
+    else:
+      with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as fp:
+        fp.write(val)
+
+      try:
+        await ctx.send(file=discord.File(fp, filename="output.txt"))
+      except (discord.Forbidden, discord.HTTPException):
+        print_exc()
 
   @commands.is_owner()
   @commands.command(name="config", hidden=True)
