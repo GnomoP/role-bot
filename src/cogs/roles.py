@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import json
-import traceback
+import tempfile
+from traceback import print_exc
 import discord
 from discord.ext import commands
 from src.const import CHAR_LIMIT
@@ -28,7 +29,7 @@ class Roles:
       try:
         await ctx.send(message)
       except Exception:
-        traceback.print_exc()
+        print_exc()
 
       return
 
@@ -43,7 +44,7 @@ class Roles:
       except Exception:
         pass
 
-      traceback.print_exc()
+      print_exc()
 
     await ctx.bot.update_roles(ctx.guild)
 
@@ -65,7 +66,7 @@ class Roles:
       except Exception:
         pass
 
-      traceback.print_exc()
+      print_exc()
 
     else:
       try:
@@ -90,7 +91,7 @@ class Roles:
       except Exception:
         pass
 
-      traceback.print_exc()
+      print_exc()
 
     else:
       try:
@@ -115,7 +116,7 @@ class Roles:
       except Exception:
         pass
 
-      traceback.print_exc()
+      print_exc()
 
     else:
       try:
@@ -139,7 +140,7 @@ class Roles:
       except Exception:
         pass
 
-      traceback.print_exc()
+      print_exc()
 
     else:
       try:
@@ -163,7 +164,7 @@ class Roles:
       except Exception:
         pass
 
-      traceback.print_exc()
+      print_exc()
 
     else:
       try:
@@ -184,7 +185,7 @@ class Roles:
         except Exception:
           pass
 
-        traceback.print_exc()
+        print_exc()
         return
 
     else:
@@ -208,12 +209,14 @@ class Roles:
     for key, val in config.items():
       roles[key] = list(map(predicate, val))
 
-    message = "```json\n{}\n```".format(json.dumps(roles, sort_keys=True, indent=2))[:CHAR_LIMIT]
+    with tempfile.TemporaryFile(encoding="utf-8") as fp:
+      json.dump(roles, fp, sort_keys=True, indent=2)
+      fp.seek(0)
 
-    try:
-      await ctx.send(message)
-    except Exception:
-      pass
+      try:
+        await ctx.send(file=fp)
+      except (discord.Forbidden, discord.HTTPException):
+        print_exc()
 
   @commands.command(name="allowed")
   async def show_allowed_roles(self, ctx, guild_id: int=0):
@@ -228,7 +231,7 @@ class Roles:
         except Exception:
           pass
 
-        traceback.print_exc()
+        print_exc()
         return
 
     else:
@@ -252,12 +255,14 @@ class Roles:
     for key, val in config.items():
       roles[key] = list(map(predicate, val))
 
-    message = "```json\n{}\n```".format(json.dumps(roles, sort_keys=True, indent=2))[:CHAR_LIMIT]
+    with tempfile.TemporaryFile(encoding="utf-8") as fp:
+      json.dump(roles, fp, sort_keys=True, indent=2)
+      fp.seek(0)
 
-    try:
-      await ctx.send(message)
-    except Exception:
-      pass
+      try:
+        await ctx.send(file=fp)
+      except (discord.Forbidden, discord.HTTPException, json.JSONDecodeError):
+        print_exc()
 
   def get_guild_channel(self, guild, id):
     if not isinstance(guild, discord.Guild):
