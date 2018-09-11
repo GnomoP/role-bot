@@ -86,9 +86,7 @@ class Owner:
       }
 
       cc = compile(code, "bot_eval.py", "eval")
-      val = eval(cc, g)
-
-      val = f"{val}"
+      val = str(eval(cc, g))
 
     except (discord.HTTPException, discord.Forbidden):
       pass
@@ -116,6 +114,7 @@ class Owner:
     else:
       with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as fp:
         fp.write(val)
+        fp.seek(0)
 
         try:
           await ctx.send(file=discord.File(fp, filename="output.txt"))
