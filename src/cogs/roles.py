@@ -209,7 +209,7 @@ class Roles:
     for key, val in config.items():
       roles[key] = list(map(predicate, val))
 
-    with tempfile.TemporaryFile(encoding="utf-8") as fp:
+    with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as fp:
       json.dump(roles, fp, sort_keys=True, indent=2)
       fp.seek(0)
 
@@ -255,7 +255,7 @@ class Roles:
     for key, val in config.items():
       roles[key] = list(map(predicate, val))
 
-    with tempfile.TemporaryFile(encoding="utf-8") as fp:
+    with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as fp:
       json.dump(roles, fp, sort_keys=True, indent=2)
       fp.seek(0)
 

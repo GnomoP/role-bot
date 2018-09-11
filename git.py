@@ -11,6 +11,9 @@ def git(*args):
   return check_call(["git"] + list(args))
 
 
+DEFAULT_BRANCH = "remote"
+
+
 __doc__ = (
   "usage: {0} <command>\n"
   "       {0} [-A | --add-all] [-v | --verbose] [-P | --push] [-t | --tail]\n"
@@ -21,7 +24,7 @@ __doc__ = (
   "script. When the parameters for the commit and checkout commands are missing,\n"
   "the script will exit with status code 1. If they start with a dash ('-'), the\n"
   "command is simply ignored. Without a given checkout branch, it defaults to the\n"
-  "'master' branch for use in other commands, such as 'push' and 'status'.\n"
+  "'{2}' branch for use in other commands, such as 'push' and 'status'.\n"
   "\n"
   "Commands:\n"
   "  -c, --checkout [branch]    Does a checkout to a new branch with\n"
@@ -32,7 +35,7 @@ __doc__ = (
   "  -v, --verbose              Checks the status with `git status -b [branch]`\n"
   "  -t, --tail                 Tails the heroku log\n"
   "  -h, --help                 Displays this help text and exits."
-).format(path.split(__file__)[1], " " * len(path.split(__file__)[1]))
+).format(path.split(__file__)[1], " " * len(path.split(__file__)[1]), DEFAULT_BRANCH)
 
 commands = {
   "checkout": False,
@@ -97,7 +100,7 @@ else:
   exit(0)
 
 try:
-  git("checkout", commands.get("checkout_branch", "master"))
+  git("checkout", commands.get("checkout_branch", DEFAULT_BRANCH))
 except CalledProcessError as e:
   if e.returncode not in (0, 1):
     traceback.print_exc()
@@ -121,7 +124,7 @@ if commands.get("commit"):
 
 if commands.get("status"):
   try:
-    git("status", "-b", commands.get("checkout_branch", "master"))
+    git("status", "-b", commands.get("checkout_branch", DEFAULT_BRANCH))
   except CalledProcessError as e:
     if e.returncode not in (0, 1):
       traceback.print_exc()
@@ -129,9 +132,9 @@ if commands.get("status"):
 
 if commands.get("push"):
   try:
-    branch = commands.get("checkout_branch", "master")
-    if branch != "master":
-      branch = branch + ":master"
+    branch = commands.get("checkout_branch", DEFAULT_BRANCH)
+    if branch != DEFAULT_BRANCH:
+      branch = branch + ":" + DEFAULT_BRANCH
     git("push", "heroku", branch)
   except CalledProcessError as e:
     if e.returncode not in (0, 1):
