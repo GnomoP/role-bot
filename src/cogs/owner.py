@@ -52,8 +52,16 @@ class Owner:
   @commands.command(name="exec", aliases=["python", "py"], hidden=True)
   async def pyexec(self, ctx, *, code):
     try:
+      g = {
+        "cog": self,
+        "json": json,
+        "ctx": ctx,
+        "bot": ctx.bot,
+        "db": ctx.bot.db,
+      }
+
       cc = compile(code, "vot_exec.py", "exec")
-      exec(cc, {"bot": self, "ctx": ctx})
+      exec(cc, g)
     except (discord.HTTPException, discord.Forbidden):
       pass
     except Exception:
@@ -69,8 +77,16 @@ class Owner:
     val = ""
 
     try:
+      g = {
+        "cog": self,
+        "json": json,
+        "ctx": ctx,
+        "bot": ctx.bot,
+        "db": ctx.bot.db,
+      }
+
       cc = compile(code, "bot_eval.py", "eval")
-      val = eval(cc, {"cog": self, "bot": ctx.bot, "ctx": ctx})
+      val = eval(cc, g)
 
       val = f"{val}"
 
