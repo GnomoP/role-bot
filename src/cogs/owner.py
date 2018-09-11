@@ -66,9 +66,11 @@ class Owner:
   @commands.is_owner()
   @commands.command(name="eval")
   async def pyeval(self, ctx, *, code):
+    val = ""
+
     try:
       cc = compile(code, "bot_eval.py", "eval")
-      val = f"{eval(cc)}"
+      val = f"{eval(cc, {"cog": self, "bot": ctx.bot, "ctx": ctx})}"
 
     except (discord.HTTPException, discord.Forbidden):
       pass
@@ -84,7 +86,10 @@ class Owner:
     else:
       await try_react(ctx, "✅")
 
-    if len(val) + 2 < 50:
+    if len(val) == 0:
+      return
+
+    elif len(val) + 2 < 50:
       await ctx.send(f"`{val}`")
 
     elif len(val) + 8 < CHAR_LIMIT:

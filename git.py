@@ -32,12 +32,14 @@ __doc__ = (
   "  -A, --add_all              Adds all changes done locally with `git add -A`\n"
   "  -m, --commit [message]     Commits the changes with `git commit -m [message]`\n"
   "  -P, --push                 Push to branch with `git push heroku [branch]`\n"
+  "  -u, --upstream             Same as --push, but with the `-u` flag.\n"
   "  -v, --verbose              Checks the status with `git status -b [branch]`\n"
   "  -t, --tail                 Tails the heroku log\n"
   "  -h, --help                 Displays this help text and exits."
 ).format(path.split(__file__)[1], " " * len(path.split(__file__)[1]), DEFAULT_BRANCH)
 
 commands = {
+  "upstream": False,
   "checkout": False,
   "add_all": False,
   "commit": False,
@@ -52,6 +54,9 @@ if len(argv) > 1:
       print(__doc__)
       exit(0)
 
+    if arg in ("-u", "--upstream"):
+      commands["upstream"] = True
+      continue
     if arg in ("-A", "--add-all"):
       commands["add_all"] = True
       continue
@@ -106,6 +111,18 @@ except CalledProcessError as e:
     traceback.print_exc()
     exit(e.returncode)
 
+if commands.get("upstream"):
+  commands["push"] = False
+  try:
+    branch = commands.get("checkout_branch", DEFAULT_BRANCH)
+    if branch != DEFAULT_BRANCH:
+      branch = branch + ":" + DEFAULT_BRANCH
+    git("push", "-u", "heroku", branch)
+  except CalledProcessError as e:
+    if e.returncode not in (0, 1):
+      traceback.print_exc()
+      exit(e.returncode)
+
 if commands.get("add_all"):
   try:
     git("add", "-A")
@@ -131,6 +148,8 @@ if commands.get("status"):
       exit(e.returncode)
 
 if commands.get("push"):
+  commands["upstream"] = False
+
   try:
     branch = commands.get("checkout_branch", DEFAULT_BRANCH)
     if branch != DEFAULT_BRANCH:
