@@ -8,6 +8,7 @@ import discord
 from discord.ext import commands
 from src.utils import get_guild_role, guild_config, has_permissions
 from src.utils import try_react, try_delete
+from src.const import CHAR_LIMIT
 
 
 class RankedRoles:
@@ -54,16 +55,27 @@ class RankedRoles:
       if role:
         roles += [role]
 
-      roles = sorted(roles, key=itemgetter("rank"), reverse=True)
+    roles = json.dumps(sorted(roles, key=itemgetter("rank")), sort_keys=True, indent=2)
 
-    with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as fp:
-      json.dump(roles, fp, sort_keys=True, indent=2)
-      fp.seek(0)
+    # Beautify and condense decoded dictionary further
+    roles.replace(",\n    \"name\"", ", \"name\"")
+    roles.replace("},\n  {", "}, {")
 
+    if len(f"```json\n{roles}\n```") > CHAR_LIMIT:
       try:
-        await ctx.send(file=discord.File(fp, filename="rank.json"))
+        await ctx.send("```json\n" + roles + "\n```")
       except (discord.Forbidden, discord.HTTPException):
         print_exc()
+
+    else:
+      with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as fp:
+        fp.write(roles)
+        fp.seek(0)
+
+        try:
+          await ctx.send(file=discord.File(fp, filename="rank.json"))
+        except (discord.Forbidden, discord.HTTPException):
+          print_exc()
 
 
 def setup(bot):
