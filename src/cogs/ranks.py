@@ -61,7 +61,7 @@ class RankedRoles:
     roles.replace(",\n    \"name\"", ", \"name\"")
     roles.replace("},\n  {", "}, {")
 
-    if len(f"```json\n{roles}\n```") > CHAR_LIMIT:
+    if len(f"```json\n{roles}\n```") < CHAR_LIMIT:
       try:
         await ctx.send("```json\n" + roles + "\n```")
       except (discord.Forbidden, discord.HTTPException):
