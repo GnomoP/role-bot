@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import re
 import json
 import tempfile
 from traceback import print_exc
@@ -58,8 +59,8 @@ class RankedRoles:
     roles = json.dumps(sorted(roles, key=itemgetter("rank"), reverse=True), sort_keys=True, indent=2)
 
     # Beautify and condense decoded dictionary further
-    roles.replace(",\n    \"name\"", ", \"name\"")
-    roles.replace("},\n  {", "}, {")
+    roles = re.sub(r'\,\n\s+"name"\,', ', "name"', roles)
+    roles = re.sub(r'\}\,\n\s+\{', '}, {', roles)
 
     if len(f"```json\n{roles}\n```") < CHAR_LIMIT:
       try:
