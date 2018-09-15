@@ -144,11 +144,47 @@ class Owner:
         print_exc()
 
   @commands.is_owner()
+  @commands.command(name="loaded", hidden=True)
+  async def loaded_cogs(self, ctx):
+    cogs = ["`{}`".format(cog.__module__) for cog in ctx.bot.cogs.values()]
+
+    if len(", ".join(cogs)) < 2000:
+      try:
+        await ctx.send(", ".join(cogs))
+      except (discord.HTTPException, discord.Forbidden, discord.NotFound):
+        try_react(ctx, "❗")
+      except Exception:
+        print_exc()
+
+    else:
+      try:
+        with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as fp:
+          json.dumps(cogs)
+          fp.seek(0)
+
+          await ctx.send(file=discord.File(fp, filename="loaded.json"))
+      except (discord.HTTPException, discord.Forbidden, discord.NotFound):
+        try_react(ctx, "❗")
+      except Exception:
+        print_exc()
+
+  @commands.is_owner()
   @commands.command(name="load", hidden=True)
   async def load_cogs(self, ctx, *cogs):
     try:
+      if len(cogs) == 0:
+        cogs = [cog.__module__ for cog in ctx.bot.cogs.values()]
+        cogs.remove("src.cogs.owner")
+      else:
+        cogs = [cog for cog in map(lambda c: "src.cogs." + c, cogs)]
+
       for cog in cogs:
-        ctx.bot.load_extension("src.cogs." + cog)
+        assert cog not in [cog.__module__ for cog in ctx.bot.cogs.values()]
+        ctx.bot.load_extension(cog)
+
+    except AssertionError:
+      await try_react(ctx, "❓")
+      fprint(f"Cannot load cog '{cog}' if already loaded in the bot.")
 
     except Exception:
       await try_react(ctx, "❗")
@@ -163,8 +199,19 @@ class Owner:
   @commands.command(name="unload", hidden=True)
   async def unload_cogs(self, ctx, *cogs):
     try:
+      if len(cogs) == 0:
+        cogs = [cog.__module__ for cog in ctx.bot.cogs.values()]
+        cogs.remove("src.cogs.owner")
+      else:
+        cogs = [cog for cog in map(lambda c: "src.cogs." + c, cogs)]
+
       for cog in cogs:
-        ctx.bot.unload_extension("src.cogs." + cog)
+        assert cog in [cog.__module__ for cog in ctx.bot.cogs.values()]
+        ctx.bot.unload_extension(cog)
+
+    except AssertionError:
+      await try_react(ctx, "❓")
+      fprint(f"Cannot unload cog '{cog}' if not loaded in the bot.")
 
     except Exception:
       await try_react(ctx, "❗")
@@ -179,9 +226,19 @@ class Owner:
   @commands.command(name="reload", hidden=True)
   async def reload_cogs(self, ctx, *cogs):
     try:
+      if len(cogs) == 0:
+        cogs = [cog.__module__ for cog in ctx.bot.cogs.values()]
+      else:
+        cogs = [cog for cog in map(lambda c: "src.cogs." + c, cogs)]
+
       for cog in cogs:
-        ctx.bot.unload_extension("src.cogs." + cog)
-        ctx.bot.load_extension("src.cogs." + cog)
+        assert cog in [cog.__module__ for cog in ctx.bot.cogs.values()]
+        ctx.bot.unload_extension(cog)
+        ctx.bot.load_extension(cog)
+
+    except AssertionError:
+      await try_react(ctx, "❓")
+      fprint(f"Cannot reload cog '{cog}' if not loaded in the bot.")
 
     except Exception:
       await try_react(ctx, "❗")

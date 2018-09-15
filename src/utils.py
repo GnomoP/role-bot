@@ -68,3 +68,72 @@ async def try_delete(message: discord.Message):
     return None
   else:
     return True
+
+
+def get_guild_channel(guild, id):
+  if not isinstance(guild, discord.Guild):
+    raise TypeError("`guild` is not an instance of `discord.Guild`")
+
+  if isinstance(id, int):
+    channel = guild.get_channel(id)
+
+    if isinstance(channel, discord.TextChannel):
+      return channel
+    else:
+      return None
+
+  elif isinstance(id, str):
+    try:
+      channel = guild.get_channel(int(id))
+
+    except Exception:
+      pass
+
+    else:
+      if isinstance(channel, discord.TextChannel):
+        return channel
+      else:
+        return None
+
+    try:
+      channel = guild.get_channel(int(id[2:-1]))
+
+    except Exception:
+      pass
+
+    else:
+      if isinstance(channel, discord.TextChannel):
+        return channel
+      else:
+        return None
+
+  else:
+    return None
+
+
+def get_guild_role(guild, id):
+  if not isinstance(guild, discord.Guild):
+    raise TypeError("`guild` is not an instance of `discord.Guild`")
+
+  for role in guild.roles:
+    if isinstance(id, int) and role.id == id:
+      break
+
+    if isinstance(id, str):
+      if role.name == id:
+        break
+
+      try:
+        if role.id == int(id):
+          break
+        if role.id == int(id[3:-1]):
+          break
+
+      except Exception:
+        pass
+
+  else:
+    return None
+
+  return role
+

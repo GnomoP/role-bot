@@ -26,14 +26,6 @@ class Bot(commands.Bot):
       guilds = ", ".join([f"\"{g.name}\"" for g in self.guilds[:3]])
       fprint(f"Present on {len(self.guilds)} guilds: {guilds}...")
 
-  async def on_guild_join(self, guild):
-    fprint(f"Joined a new guild: '{guild.name}' ({guild.id})")
-    guild_config(self.db, guild.id)
-
-  async def on_guild_remove(self, guild):
-    fprint(f"Left a guild: '{guild.name}' ({guild.id})")
-    self.db.delete(guild.id)
-
   async def on_command_error(self, ctx, e):
     if type(e).__name__ in ("CommandNotFound", "CheckFailure", "NotOwner"):
       return
