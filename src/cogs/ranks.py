@@ -59,7 +59,7 @@ class RankedRoles:
     roles = json.dumps(sorted(roles, key=itemgetter("rank"), reverse=True), sort_keys=True, indent=2)
 
     # Beautify and condense decoded dictionary further
-    roles = re.sub(r'\,\n\s+"name"\,', ', "name"', roles)
+    roles = re.sub(r'\,\s*\n\s*"name"\,', ', "name"', roles)
     roles = re.sub(r'\}\,\n\s+\{', '}, {', roles)
 
     if len(f"```json\n{roles}\n```") < CHAR_LIMIT:
