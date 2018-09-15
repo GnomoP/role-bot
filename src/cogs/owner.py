@@ -10,7 +10,7 @@ import discord
 from discord.ext import commands
 from src.const import SYNC_TIME, CHAR_LIMIT
 from src.utils import fprint, guild_config
-from src.utils import try_react, try_delete
+from src.utils import try_react, try_delete, try_send
 
 
 class Owner:
@@ -184,7 +184,11 @@ class Owner:
 
     except AssertionError:
       await try_react(ctx, "❓")
-      fprint(f"Cannot load cog '{cog}' if already loaded in the bot.")
+      fprint(f"Cannot load cog '{cog}' - Already loaded in the bot.", file=sys.stderr)
+
+    except ModuleNotFoundError as e:
+      await try_react(ctx, "❓")
+      fprint(f"Cannot load cog '{cog}' - {e.args}", file=sys.stderr)
 
     except Exception:
       await try_react(ctx, "❗")

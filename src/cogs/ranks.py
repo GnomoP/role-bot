@@ -3,9 +3,9 @@
 import json
 import tempfile
 from traceback import print_exc
+from operator import itemgetter
 import discord
 from discord.ext import commands
-from src.const import CHAR_LIMIT
 from src.utils import get_guild_role, guild_config, has_permissions
 from src.utils import try_react, try_delete
 
@@ -41,8 +41,6 @@ class RankedRoles:
 
       config[role] = rank
 
-    config = dict(sorted(config.items()))
-
     def predicate(role, rank):
       role = get_guild_role(guild, role)
 
@@ -55,6 +53,8 @@ class RankedRoles:
       role = predicate(key, val)
       if role:
         roles += [role]
+
+      roles = sorted(roles, key=itemgetter("rank"), reverse=True)
 
     with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as fp:
       json.dump(roles, fp, sort_keys=True, indent=2)

@@ -70,6 +70,15 @@ async def try_delete(message: discord.Message):
     return True
 
 
+async def try_send(ctx: discord.abc.Messageable, *args, **kwargs):
+  try:
+    await ctx.send(*args, **kwargs)
+  except (discord.HTTPException, discord.Forbidden, discord.NotFound):
+    return None
+  else:
+    return True
+
+
 def get_guild_channel(guild, id):
   if not isinstance(guild, discord.Guild):
     raise TypeError("`guild` is not an instance of `discord.Guild`")
