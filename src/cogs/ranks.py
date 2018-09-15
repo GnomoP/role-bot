@@ -55,7 +55,7 @@ class RankedRoles:
       if role:
         roles += [role]
 
-    roles = json.dumps(sorted(roles, key=itemgetter("rank")), sort_keys=True, indent=2)
+    roles = json.dumps(sorted(roles, key=itemgetter("rank"), reverse=True), sort_keys=True, indent=2)
 
     # Beautify and condense decoded dictionary further
     roles.replace(",\n    \"name\"", ", \"name\"")
